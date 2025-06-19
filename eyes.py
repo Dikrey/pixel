@@ -1,8 +1,4 @@
 """
-Eyes class is responsible for rendering animated eyes on an SH1106 OLED display using the luma.oled library.
-it handles eye movements, blinking, eyelid expressions, and mood-based animations such as angry, sad, tired, and happy.
-the eyes can also move randomly when idle, simulating a more natural and lifelike behavior.
-
 this implementation is inspired by the RoboEyes library (https://github.com/FluxGarage/RoboEyes), originally written in C++.
 """
 
@@ -96,23 +92,23 @@ class Eyes:
             eyelid_h_r_next=eye_y
         )
         
-        # happy eyelid
+        # happy
         self.eyelid_happy_h = 1
         self.eyelid_happy_h_next = 1
         
-        # state
+        
         self.is_open = False
         self.is_idle = False
         self.mood = EyesMood.NEUTRAL
         self.idle_timer = 0
         self.blink_timer = 0
         
-        # start drawing thread
+        # mulai drawing 
         self.thread = Thread(target=self.draw, daemon=True)
         self.thread.start()
     
     def interpolate(self, current, target):
-        # use averging interpolation for smooth transitions
+      
         return (current + target) / 2
     
     def get_max_x_limit(self):
@@ -164,24 +160,23 @@ class Eyes:
         self.eye_r.w = self.interpolate(self.eye_r.w, self.eye_r.w_next)
         self.eye_r.h = self.interpolate(self.eye_r.h, self.eye_r.h_next)
 
-        # centering
+        # center
         self.eye_l.x += (self.default_eye_w - self.eye_l.w) / 2
         self.eye_l.y += (self.default_eye_h - self.eye_l.h) / 2
         self.eye_r.x += (self.default_eye_w - self.eye_r.w) / 2
         self.eye_r.y += (self.default_eye_h - self.eye_r.h) / 2
 
-        # position
+        # posisi
         self.eye_l.x = self.interpolate(self.eye_l.x, self.eye_l.x_next)
         self.eye_l.y = self.interpolate(self.eye_l.y, self.eye_l.y_next)
-
-        # position of the right eye relative to the left eye
+        
         self.eye_r.x_next = self.eye_l.x_next + self.eye_l.w + self.default_eye_gap
         self.eye_r.y_next = self.eye_l.y_next
         self.eye_r.x = self.interpolate(self.eye_r.x, self.eye_r.x_next)
         self.eye_r.y = self.interpolate(self.eye_r.y, self.eye_r.y_next)
         
     def update_eye_state(self):
-        # open eyes afterblinking
+       
         if self.is_open:
             if self.eye_l.h <= 1.1: self.eye_l.h_next = self.default_eye_h
             if self.eye_r.h <= 1.1: self.eye_r.h_next = self.default_eye_h
@@ -192,35 +187,35 @@ class Eyes:
             self.eye_r.h_next = 1
             self.blink_timer = time() + uniform(3, 6)
 
-        # idle movement
+       
         if self.is_idle and self.is_open and time() >= self.idle_timer:
             self.eye_l.x_next = uniform(0, self.get_max_x_limit())
             self.eye_l.y_next = uniform(0, self.get_max_y_limit())
             self.idle_timer = time() + uniform(3, 6)
     
     def update_eyelids(self):
-        # neutral
+       
         if self.mood in (EyesMood.NEUTRAL, EyesMood.HAPPY):
             self.eye_l.eyelid_h_l_next = self.eye_l.y
             self.eye_l.eyelid_h_r_next = self.eye_l.y
             self.eye_r.eyelid_h_l_next = self.eye_r.y
             self.eye_r.eyelid_h_r_next = self.eye_r.y
 
-        # angry
+        # marah
         if self.mood == EyesMood.ANGRY:
             self.eye_l.eyelid_h_l_next = self.eye_l.y + (self.eye_l.h / 4)
             self.eye_l.eyelid_h_r_next = self.eye_l.y + (self.eye_l.h / 2)
             self.eye_r.eyelid_h_l_next = self.eye_r.y + (self.eye_r.h / 2)
             self.eye_r.eyelid_h_r_next = self.eye_r.y + (self.eye_r.h / 4)
 
-        # sad
+        # sedih
         if self.mood == EyesMood.SAD:
             self.eye_l.eyelid_h_l_next = self.eye_l.y + (self.eye_l.h / 2)
             self.eye_l.eyelid_h_r_next = self.eye_l.y + (self.eye_l.h / 4)
             self.eye_r.eyelid_h_l_next = self.eye_r.y + (self.eye_r.h / 4)
             self.eye_r.eyelid_h_r_next = self.eye_r.y + (self.eye_r.h / 2)
 
-        # tired
+      
         if self.mood == EyesMood.TIRED:
             self.eye_l.eyelid_h_l_next = self.eye_l.y + (self.eye_l.h / 1.2)
             self.eye_l.eyelid_h_r_next = self.eye_l.y + (self.eye_l.h / 1.4)
