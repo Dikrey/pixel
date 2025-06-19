@@ -4,7 +4,7 @@ from time import sleep
 def main():
     eyes = Eyes()
     eyes.open()
-    # eyes.set_idle(True)
+   
 
     while True:
         eyes.set_mood(EyesMood.NEUTRAL)
